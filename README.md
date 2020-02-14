@@ -20,8 +20,7 @@ Detect and classify all digits in Street View Image
 │   └── raw
 │       ├── extra_32x32.mat
 │       ├── test_32x32.mat
-│       ├── train_32x32.mat
-│       └── train.tar.gz
+│       └── train_32x32.mat
 ├── LICENSE
 ├── models
 ├── README.md
@@ -30,12 +29,17 @@ Detect and classify all digits in Street View Image
 ├── requirements.txt
 └── src
     ├── data
-    │   └── make_data.py
+    │   ├── data_preprocess.py
+    │   └── __init__.py
     ├── features
-    │   └── build_features.py
-    ├── init.py
+    │   ├── build_features.py
+    │   └── __init__.py
+    ├── __init__.py
     ├── models
+    │   ├── __init__.py
     │   ├── predict_model.py
     │   └── train_model.py
     └── visualization
+        ├── __init__.py
         └── visualize.py
+
