@@ -205,8 +205,7 @@ for epoch in range(max_epochs):
         _, train_accu, c = sess.run([optimizer, accuracy, loss], feed_dict={x: epoch_x, y: epoch_y, discard_rate: discard_per})
         train_loss.append(c)
     
-        #if(step%40 == 0):
-        if True:
+        if(step%40 == 0):
             print ("Step:", step, ".....", "\nMini-Batch Loss   : ", c)
             print('Mini-Batch Accuracy :' , train_accu*100.0, '%')
 
@@ -219,7 +218,6 @@ for epoch in range(max_epochs):
             print('Validation Accuracy :' , accu*100.0/y_val.shape[0], '%')
             print ()
         step = step + 1
-
 
     print ('Epoch', epoch+1, 'completed out of ', max_epochs)
 
