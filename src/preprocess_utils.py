@@ -117,3 +117,14 @@ def get_batch(X, y, batch_size=512):
         yield(X[i:end],y[i:end])
 
 
+def flatten(lists):
+    """
+    Convert Lists of List to numpy array¶
+    """
+    results = []
+    for numbers in lists:
+        for x in numbers:
+            results.append(x)
+    return np.asarray(results)
+
+

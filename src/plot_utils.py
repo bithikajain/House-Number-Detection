@@ -3,6 +3,7 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 plt.rcParams['figure.figsize'] = (16.0, 4.0)
 def plot_images(img, labels, nrows, ncols, output_dir, filename):
@@ -32,7 +33,7 @@ def plot_data_distribution(train_labels, test_labels, output_dir, filename):
     fig.tight_layout()
     fig.savefig(os.path.join(output_dir,filename ))
 
-def plot_train_images(images, nrows, ncols, cls_true, cls_pred=None, output_dir, filename):
+def plot_train_images(images, nrows, ncols, cls_true,  output_dir, filename, cls_pred=None):
     """ Plot nrows * ncols images from images and annotate the images
     """
     # Initialize the subplotgrid
@@ -62,3 +63,27 @@ def plot_train_images(images, nrows, ncols, cls_true, cls_pred=None, output_dir,
         ax.set_xticks([])
         ax.set_yticks([])
     fig.savefig(os.path.join(output_dir,filename ))
+
+def plot_confusion_metric(y_test,flat_array, output_dir,filename ):
+    
+    # Calculate the confusion matrix
+    cm = confusion_matrix(y_true=np.argmax(y_test, axis=1), y_pred=flat_array)
+
+    # Normalize the confusion matrix
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100.0
+
+    # Set the figure size
+    fig = plt.figure(figsize=(12, 8))
+    # Visualize the confusion matrix
+    ax = sns.heatmap(cm, annot=True, cmap='Reds', fmt='.1f', square=True);
+    fig.savefig(os.path.join(output_dir,filename ))
+
+def plot_learning_rate(train_loss, valid_loss, output_dir, filename):
+    
+    plt.figure(figsize = (8, 6))
+    plt.plot(train_loss ,'r', label = 'training loss')
+    plt.plot(valid_loss, 'g' , label = 'validation loss')
+    plt.xlabel('Step #')
+    plt.legend()
+    plt.savefig(os.path.join(output_dir,filename ))
+    

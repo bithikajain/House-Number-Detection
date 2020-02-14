@@ -17,12 +17,13 @@ from sklearn.preprocessing import OneHotEncoder
 import tensorflow as tf
 import argparse
 import h5py
+from sklearn.metrics import confusion_matrix
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 plt.rcParams['figure.figsize'] = (16.0, 4.0)
 
-from preprocess_utils import load_preprocessed_data, prepare_log_dir, get_batch
-
+from plot_utils import  plot_confusion_metric, plot_train_images, plot_learning_rate
+from preprocess_utils import load_preprocessed_data, prepare_log_dir, get_batch, flatten
 ###############################################################################
 ###############################################################################
 #               Argument Parsing
@@ -48,12 +49,15 @@ args = parser.parse_args()
 ###############################################################################
 
 
-max_epochs = 2
+max_epochs = 10
 batch_size = 512
 
 #Discarding or fuse % of neurons in Train mode
 discard_per = 0.7
 
+for d in [args.summary_dir, args.output_dir]:
+  try: os.makedirs(d)
+  except: pass
 
 TENSORBOARD_SUMMARIES_DIR = os.path.join(args.summary_dir, 'svhn_classifier_logs')
 
@@ -201,7 +205,8 @@ for epoch in range(max_epochs):
         _, train_accu, c = sess.run([optimizer, accuracy, loss], feed_dict={x: epoch_x, y: epoch_y, discard_rate: discard_per})
         train_loss.append(c)
     
-        if(step%40 == 0):
+        #if(step%40 == 0):
+        if True:
             print ("Step:", step, ".....", "\nMini-Batch Loss   : ", c)
             print('Mini-Batch Accuracy :' , train_accu*100.0, '%')
 
@@ -232,3 +237,65 @@ print("Time usage: " + str(timedelta(seconds=int(round(time_diff)))))
 print ()
 
 saver.save(sess=sess, save_path=save_path)
+
+
+### save model ckpts 
+saver = tf.train.Saver()
+save_dir = os.path.join(args.summary_dir, 'checkpoints/')
+
+# Create directory if it does not exist
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
+    
+save_path = os.path.join(save_dir, 'svhn_single_greyscale')
+
+###############################################################################
+###############################################################################
+#
+#        Plotting
+# 
+#
+
+print('Plotting ')
+plot_train_images(X_train, 3, 6, y_train, args.output_dir, 'train_reults.png' )
+
+test_pred = []
+for (epoch_x , epoch_y) in get_batch(X_test, y_test, 512):
+    correct = sess.run([prediction_cls], feed_dict={x: epoch_x, y: epoch_y, discard_rate: 0.0})
+    test_pred.append((np.asarray(correct, dtype=int)).T)
+
+print ('Predicting completed')
+
+
+flat_array = flatten(test_pred)
+flat_array = (flat_array.T)
+flat_array = flat_array[0]
+
+print('Plotting confusion metric')
+plot_confusion_metric(y_test, flat_array, args.output_dir,'confusion_metric.png' )
+
+incorrect = flat_array != np.argmax(y_test, axis=1)
+
+print('Plotting misclassified results')
+# Select the incorrectly classified examples
+images = X_test[incorrect]
+cls_true = y_test[incorrect]
+cls_pred = flat_array[incorrect]
+
+# Plot the mis-classified examples
+plot_train_images(images, 3, 6, cls_true, args.output_dir, 'missclassified_test_reults.png', cls_pred)
+
+print('Plotting correctly classified results')
+# Find the incorrectly classified examples
+correct = np.invert(incorrect)
+
+# Select the correctly classified examples
+images = X_test[correct]
+cls_true = y_test[correct]
+cls_pred = flat_array[correct]
+
+# Plot the mis-classified examples
+plot_train_images(images, 3, 6, cls_true, args.output_dir, 'correct_classified_test_reults.png', cls_pred)
+
+# Plot the learning rate
+plot_learning_rate(train_loss, valid_loss, args.output_dir, 'learning_curves.png')
