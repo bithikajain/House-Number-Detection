@@ -12,7 +12,7 @@ Detect and classify all digits in Street View Image
 - Pytorch 
 
 ### Directory structure 
-
+```
 ├── data
 │   ├── external
 │   ├── interim
@@ -42,4 +42,4 @@ Detect and classify all digits in Street View Image
     └── visualization
         ├── __init__.py
         └── visualize.py
-
+```
